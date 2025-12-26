@@ -13,7 +13,7 @@ from detectron2.modeling.postprocessing import sem_seg_postprocess
 from detectron2.structures import Boxes, ImageList, Instances, BitMasks
 from detectron2.utils.memory import retry_if_cuda_oom
 
-from .depth_fusion_block import Depth_backbone, WWWC, Resnet
+from .depth_fusion_block import Depth_backbone, BW_AMG, Resnet
 from .modeling.criterion import SetCriterion
 from .modeling.matcher import HungarianMatcher
 
@@ -100,10 +100,10 @@ class MaskFormer(nn.Module):
         # swin-s作为backbone
         #in_channels = [96, 192, 384, 768] 
 
-        self.WWWC0 = WWWC(in_channels = in_channels[0], size = 32)
-        self.WWWC1 = WWWC(in_channels = in_channels[1], size = 16)
-        self.WWWC2 = WWWC(in_channels = in_channels[2], size = 8)
-        self.WWWC3 = WWWC(in_channels = in_channels[3], size = 4)
+        self.BW_AMG0 = BW_AMG(in_channels = in_channels[0], size = 32)
+        self.BW_AMG1 = BW_AMG(in_channels = in_channels[1], size = 16)
+        self.BW_AMG2 = BW_AMG(in_channels = in_channels[2], size = 8)
+        self.BW_AMG3 = BW_AMG(in_channels = in_channels[3], size = 4)
     
         # 初始化时计算并打印参数量
         self.count_parameters()
@@ -236,10 +236,10 @@ class MaskFormer(nn.Module):
         # features['res4'] = features['res4'] + features_depth[2]
         # features['res5'] = features['res5'] + features_depth[3]
 
-        features['res2'] = self.WWWC0(features['res2'] , features_depth[0])
-        features['res3'] = self.WWWC1(features['res3'] , features_depth[1])
-        features['res4'] = self.WWWC2(features['res4'] , features_depth[2])
-        features['res5'] = self.WWWC3(features['res5'] , features_depth[3])
+        features['res2'] = self.BW_AMG0(features['res2'] , features_depth[0])
+        features['res3'] = self.BW_AMG1(features['res3'] , features_depth[1])
+        features['res4'] = self.BW_AMG2(features['res4'] , features_depth[2])
+        features['res5'] = self.BW_AMG3(features['res5'] , features_depth[3])
         
         outputs = self.sem_seg_head(features)
 
