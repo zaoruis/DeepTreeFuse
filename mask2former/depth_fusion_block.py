@@ -126,9 +126,9 @@ class GraphConvInteraction(nn.Module):
     
     
 # depth_layer block
-class Depth_block(nn.Module):
+class HFMA(nn.Module):
     def __init__(self, in_channels):
-        super(Depth_block, self).__init__()
+        super(HFMA, self).__init__()
         self.dwt = DWT()
         self.iwt = IWT()
         self.GraphConv = GraphConvInteraction(in_channels)
@@ -153,10 +153,10 @@ class Depth_backbone(nn.Module):
         # swin-s作为backbone
         #in_channels = [96, 192, 384, 768]            
         self.item = Item()
-        self.block0 = Depth_block(in_channels[0])
-        self.block1 = Depth_block(in_channels[1])
-        self.block2 = Depth_block(in_channels[2])
-        self.block3 = Depth_block(in_channels[3])
+        self.block0 = HFMA(in_channels[0])
+        self.block1 = HFMA(in_channels[1])
+        self.block2 = HFMA(in_channels[2])
+        self.block3 = HFMA(in_channels[3])
         
         self.conv0 = nn.Conv2d(in_channels = 64, 
                                out_channels = in_channels[0], 
@@ -186,9 +186,9 @@ class Depth_backbone(nn.Module):
 
 
 
-class Sampler(nn.Module):
+class DWS_TL(nn.Module):
     def __init__(self, in_channels, size, ratio = 0.5):
-        super(Sampler, self).__init__()
+        super(DWS_TL, self).__init__()
         self.size = size
         self.ratio = ratio
         self.attn_conv = nn.Conv2d(in_channels, 1, kernel_size = 1)
@@ -269,9 +269,9 @@ class Sampler(nn.Module):
         return weight
 
 # 3WC
-class WWWC(nn.Module):
+class BW_AMG(nn.Module):
     def __init__(self, in_channels, size):
-        super(WWWC, self).__init__()
+        super(BW_AMG, self).__init__()
         # 交替拼接后通道数会翻倍，因此卷积层输入通道数为2*in_channels
         self.conv1 = nn.Conv2d(
             in_channels=2 * in_channels,
@@ -289,7 +289,7 @@ class WWWC(nn.Module):
             stride=1
         )
         
-        self.weight = Sampler(in_channels=in_channels, size=size)
+        self.weight = DWS_TL(in_channels=in_channels, size=size)
 
     # 经纬度交错连接   
     def interleave_channels(self, a, b):
